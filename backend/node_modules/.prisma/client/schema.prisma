@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  preferences Preference?
+  history     History[]
+  favorites   Favorite[]
+}
+
+// User preferences
+model Preference {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  dietaryRestrictions String[] // ["vegetarian", "vegan", "gluten-free"]
+  allergies           String[] // ["nuts", "dairy", "shellfish"]
+  cuisinePreferences  String[] // ["italian", "asian", "mexican"]
+  spiceLevel          Int      @default(2) // 1-5
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Meal history
+model History {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mealType  String // "recipe" or "restaurant"
+  mealId    String // External ID (Spoonacular or restaurant)
+  mealName  String
+  mealImage String?
+
+  cookingTime Int? // minutes
+  budget      String // "low", "medium", "high"
+  rating      Int? // 1-5
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// Favorites
+model Favorite {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  mealType  String
+  mealId    String
+  mealName  String
+  mealImage String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, mealId])
+  @@index([userId])
+}
+
+// Questionnaire responses (for analytics)
+model QuestionnaireResponse {
+  id     String  @id @default(uuid())
+  userId String? // nullable for anonymous users
+
+  wantToCook    Boolean
+  timeAvailable Int // minutes
+  budget        String // "low", "medium", "high"
+  mealTime      String // "breakfast", "lunch", "dinner", "snack"
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}

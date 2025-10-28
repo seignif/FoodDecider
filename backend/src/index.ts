@@ -27,11 +27,15 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Routes (to be added)
-// app.use('/api/auth', authRoutes);
-// app.use('/api/questionnaire', questionnaireRoutes);
-// app.use('/api/suggestions', suggestionRoutes);
-// app.use('/api/history', historyRoutes);
+// Import routes
+import authRoutes from './routes/auth.routes';
+import suggestionRoutes from './routes/suggestion.routes';
+import preferenceRoutes from './routes/preference.routes';
+
+// Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/suggestions', suggestionRoutes);
+app.use('/api/preferences', preferenceRoutes);
 
 // 404 handler
 app.use((req, res) => {
